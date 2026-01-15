@@ -18,3 +18,8 @@ pnpm run dev
 ## Known issues
 
 - HMR doesn't work all the time
+
+## Roadmap
+
+- Simple Interval timers (Tabata like)
+- Complex Interval timers

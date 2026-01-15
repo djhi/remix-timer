@@ -8,7 +8,7 @@ import { NotFound } from "./NotFound";
 
 function App(this: Handle) {
   const router = new Router({
-    basename: "/remix-timer",
+    basename: import.meta.env.BASE_URL,
     routes: [
       {
         path: "/",

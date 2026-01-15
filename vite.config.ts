@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
-  base: "/remix-timer/",
+  base: mode === "production" ? "/remix-timer/" : "/",
   plugins: [
     tailwindcss(),
     VitePWA({ registerType: "autoUpdate" }),

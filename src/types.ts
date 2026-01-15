@@ -7,3 +7,5 @@ export const TimerSchema = v.object({
 });
 
 export type TimerDefinition = v.InferOutput<typeof TimerSchema>;
+
+export type TimerStatus = "idle" | "running" | "paused" | "finished";

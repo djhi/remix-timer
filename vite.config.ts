@@ -3,7 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: "/remix-timer/",
   plugins: [
     tailwindcss(),
     VitePWA({ registerType: "autoUpdate" }),
@@ -11,4 +12,4 @@ export default defineConfig({
       jsxImportSource: "@remix-run/component",
     }),
   ],
-});
+}));

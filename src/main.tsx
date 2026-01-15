@@ -7,14 +7,17 @@ import { Link, Outlet, RouterProvider } from "./RouterProvider";
 import { NotFound } from "./NotFound";
 
 function App(this: Handle) {
-  const router = new Router([
-    {
-      path: "/",
-      render: () => <TimerList />,
-    },
-    { path: "/new", render: () => <TimerNew /> },
-    { path: "*", render: () => <NotFound /> },
-  ]);
+  const router = new Router({
+    basename: "/remix-timer",
+    routes: [
+      {
+        path: "/",
+        render: () => <TimerList />,
+      },
+      { path: "/new", render: () => <TimerNew /> },
+      { path: "*", render: () => <NotFound /> },
+    ],
+  });
 
   return () => (
     <RouterProvider router={router}>

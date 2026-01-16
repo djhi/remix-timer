@@ -34,7 +34,7 @@ function App(this: Handle) {
 function Header(this: Handle) {
   return () => (
     <div class="navbar bg-base-300 shadow-sm">
-      <Link to="/" class="btn btn-ghost text-xl">
+      <Link href="/" class="btn btn-ghost text-xl">
         Remix Timer
       </Link>
     </div>

@@ -1,6 +1,5 @@
 import type { Handle, RemixNode } from "@remix-run/component";
-import type { To } from "history";
-import { parseToInfo, Router } from "./stores/Router";
+import { Router } from "./stores/Router";
 
 export function RouterProvider(this: Handle<{ router: Router }>, { router }: { router: Router }) {
   this.context.set({ router });
@@ -15,29 +14,21 @@ export function Outlet(this: Handle) {
   };
 }
 
-export function Navigate(this: Handle, { to }: { to: To }) {
+export function Navigate(
+  this: Handle,
+  { href, ...options }: { href: string } & NavigationNavigateOptions,
+) {
   const { router } = this.context.get(RouterProvider);
-  router.navigate(to);
+  router.navigate(href, options);
   return null;
 }
 
 export function Link(this: Handle) {
   const { router } = this.context.get(RouterProvider);
-  return ({ to, ...props }: Omit<JSX.IntrinsicHTMLElements["a"], "href"> & { to: To }) => {
-    const parsed = parseToInfo(to);
+  return ({ href, ...props }: JSX.IntrinsicHTMLElements["a"]) => {
     return (
       // @ts-ignore Weird type in Remix
-      <a
-        {...props}
-        href={router.createHref(to)}
-        on={{
-          click: (event) => {
-            if (parsed.isExternal) return;
-            event.preventDefault();
-            router.navigate(to);
-          },
-        }}
-      />
+      <a {...props} href={href ? router.createHref(href) : undefined} />
     );
   };
 }

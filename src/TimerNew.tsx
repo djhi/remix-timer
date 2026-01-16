@@ -136,7 +136,7 @@ export function TimerNew(this: Handle) {
       <button type="submit" class="btn btn-primary btn-xl">
         Save
       </button>
-      <Link to="/" class="btn btn-xl">
+      <Link href="/" class="btn btn-xl">
         Cancel
       </Link>
     </form>

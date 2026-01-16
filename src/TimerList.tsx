@@ -10,7 +10,7 @@ export function TimerList(this: Handle) {
     if (timerStore.isPending) return null;
 
     if (timerStore.timers.length === 0) {
-      return <Navigate to="/new" />;
+      return <Navigate href="/new" />;
     }
 
     return (
@@ -23,7 +23,7 @@ export function TimerList(this: Handle) {
           ))}
         </ul>
         <div class="fab left-1/2 -translate-x-1/2 end-[unset]">
-          <Link to="/new" class="btn btn-xl btn-primary btn-circle">
+          <Link href="/new" class="btn btn-xl btn-primary btn-circle">
             <span class="sr-only">Add one</span>
             <PlusIcon />
           </Link>

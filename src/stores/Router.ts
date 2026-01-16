@@ -1,6 +1,5 @@
 import type { RemixNode } from "@remix-run/component/jsx-runtime";
 import { RoutePattern } from "@remix-run/route-pattern";
-import { createBrowserHistory, type History, type Location, type To } from "history";
 
 export type Route = {
   path: string;
@@ -9,7 +8,6 @@ export type Route = {
 };
 
 export class Router extends EventTarget {
-  private history: History;
   private basename: string;
   private routes: Array<Route> = [];
   private _currentRoute: Route | undefined = undefined;
@@ -23,7 +21,6 @@ export class Router extends EventTarget {
   }) {
     super();
     this.basename = basename;
-    this.history = createBrowserHistory();
 
     this.routes = routes.map((route) => ({
       ...route,
@@ -33,20 +30,25 @@ export class Router extends EventTarget {
       },
     }));
 
-    this.history.listen(({ location }) => {
-      this.matchCurrentLocation(location);
+    window.navigation.addEventListener("navigate", (event) => {
+      if (shouldNotIntercept(event)) return;
+      event.intercept({
+        handler: async () => {
+          this.matchCurrentLocation(event.destination.url);
+        },
+      });
     });
 
-    this.matchCurrentLocation(this.history.location);
+    this.matchCurrentLocation(location.href);
   }
 
-  matchCurrentLocation(location: Location) {
-    const url = new URL(
-      stripBasename({ basename: this.basename, pathname: location.pathname }),
-      window.location.toString(),
-    ).toString();
-
-    const matchedRoute = this.routes.find((route) => route.match(url));
+  matchCurrentLocation(url: string) {
+    const baseUrl = new URL(url);
+    const sanitizedUrl = new URL(
+      stripBasename({ basename: this.basename, pathname: baseUrl.pathname }),
+      baseUrl,
+    );
+    const matchedRoute = this.routes.find((route) => route.match(sanitizedUrl.href));
     this._currentRoute = matchedRoute;
     this.dispatchEvent(new Event("change"));
   }
@@ -58,37 +60,14 @@ export class Router extends EventTarget {
     return this._currentRoute;
   }
 
-  navigate(to: To) {
-    const parsed = parseToInfo(to);
-    if (parsed.absoluteURL) {
-      const url = prependBasename({ basename: this.basename, pathname: parsed.absoluteURL });
-      this.history.push(url);
-      return;
-    }
-    this.history.push(to);
+  createHref(to: string) {
+    return prependBasename({ basename: this.basename, pathname: to });
   }
 
-  createHref(to: To) {
-    const parsed = parseToInfo(to);
-    if (parsed.absoluteURL) {
-      const url = prependBasename({ basename: this.basename, pathname: parsed.absoluteURL });
-      return this.history.createHref(url);
-    }
-    return this.history.createHref(to);
+  navigate(url: string, options?: NavigationNavigateOptions) {
+    window.navigation.navigate(this.createHref(url), options);
   }
 }
-
-export type ParsedLocationInfo<T extends To> =
-  | {
-      absoluteURL: string;
-      isExternal: boolean;
-      to: string;
-    }
-  | {
-      absoluteURL: undefined;
-      isExternal: false;
-      to: T;
-    };
 
 const joinPaths = (paths: string[]): string => paths.join("/").replace(/\/\/+/g, "/");
 
@@ -119,39 +98,19 @@ function stripBasename({ basename, pathname }: { pathname: string; basename: str
   return pathname.slice(startIndex) || "/";
 }
 
-export function parseToInfo<T extends To | string>(_to: T): ParsedLocationInfo<T> {
-  let to = _to as string;
-  if (typeof to !== "string") {
-    return { to, absoluteURL: undefined, isExternal: false };
-  }
-
-  let absoluteURL = to;
-  let isExternal = false;
-  try {
-    let currentUrl = new URL(window.location.href);
-    let targetUrl = to.startsWith("//")
-      ? new URL(currentUrl.protocol + to)
-      : new URL(to, window.location.href);
-    let path = targetUrl.pathname;
-
-    if (targetUrl.origin === currentUrl.origin && path != null) {
-      // Strip the protocol/origin/basename for same-origin absolute URLs
-      to = path + targetUrl.search + targetUrl.hash;
-    } else {
-      isExternal = true;
-    }
-  } catch (e) {
-    console.warn(e);
-    // We can't do external URL detection without a valid URL
-    console.warn(
-      `<Link to="${to}"> contains an invalid URL which will probably break ` +
-        `when clicked - please update to a valid URL path.`,
-    );
-  }
-
-  return {
-    absoluteURL,
-    isExternal,
-    to,
-  };
+// Code from
+// https://developer.chrome.com/docs/web-platform/navigation-api/#deciding-how-to-handle-a-navigation
+function shouldNotIntercept(navigationEvent: NavigateEvent) {
+  return (
+    !navigationEvent.canIntercept ||
+    // If this is just a hashChange,
+    // just let the browser handle scrolling to the content.
+    navigationEvent.hashChange ||
+    // If this is a download,
+    // let the browser perform the download.
+    navigationEvent.downloadRequest ||
+    // If this is a form submission,
+    // let that go to the server.
+    navigationEvent.formData
+  );
 }

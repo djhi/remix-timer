@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ES2022",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
+    "types": ["vite/client", "@types/dom-navigation"],
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@remix-run/component",
@@ -22,7 +22,7 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
   },
-  "include": ["src"]
+  "include": ["src"],
 }

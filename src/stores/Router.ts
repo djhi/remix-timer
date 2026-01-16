@@ -55,7 +55,9 @@ export class Router extends EventTarget {
 
   get currentRoute() {
     if (this._currentRoute == null) {
-      throw new Error("No matched route. Add a wildcard route to handle this case");
+      throw new Error(
+        'No matched route. Add a wildcard route (`{ path: "*", render: () => <NotFound /> }`) to handle this case',
+      );
     }
     return this._currentRoute;
   }
